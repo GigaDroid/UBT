@@ -1,0 +1,2 @@
+adb start-server
+exit
