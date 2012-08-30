@@ -52,8 +52,8 @@ echo.
 echo ##########################################Tools##########################################
 echo. 										     
 echo  9.  Install Drivers							     
-echo  10. Unlock Bootloader (only Galaxy Nexus, will wipe all data)		     
-echo  11. Install CWM/ CWM Touch(only Galaxy Nexus, S2 and S3)	     
+echo  10.  Unlock Bootloader (only Galaxy Nexus, will wipe all data)		     
+echo  11. Install CWM/ CWM Touch(only Galaxy Nexus, more devices coming soon)	     
 echo  12. Root your phone (requires custom recovery)				     
 echo  13. All in one (only Galaxy Nexus, will wipe all data)			     
 echo. 										     
@@ -80,7 +80,7 @@ if "%C%"=="7" goto single
 :single 
 cls
 set /P App=List the package name (e.g. com.google.android.apps.plus) that you would like to backup:
-adb backup ^<%App%^> f- %Pfad%
+adb backup ^<%App%^> -f "%Pfad%"
 echo Look at your phone.
 echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
 pause
@@ -906,7 +906,7 @@ goto menu
 cls
 echo Look at your phone.
 echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
-adb backup -apk -shared -all -nosystem -f %Pfad%
+adb backup -apk -shared -all -nosystem -f "%Pfad%"
 pause
 goto menu
 
@@ -914,7 +914,7 @@ goto menu
 cls
 echo Look at your phone.
 echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
-adb backup -apk -shared -all -system -f %Pfad%
+adb backup -apk -shared -all -system -f "%Pfad%"
 pause
 goto menu
 
@@ -922,7 +922,7 @@ goto menu
 cls
 echo Look at your phone.
 echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
-adb backup -all -f %Pfad%
+adb backup -all -f "%Pfad%"
 pause
 goto menu
 
@@ -930,7 +930,7 @@ goto menu
 cls
 echo Look at your phone.
 echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
-adb backup -apk -noshared -nosystem -f %Pfad%
+adb backup -apk -noshared -nosystem -f "%Pfad%"
 pause
 goto menu
 
@@ -938,7 +938,7 @@ goto menu
 cls
 echo Look at your phone.
 echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
-adb backup -noapk -shared -nosystem -f %Pfad%
+adb backup -noapk -shared -nosystem -f "%Pfad%"
 pause
 goto menu
 
