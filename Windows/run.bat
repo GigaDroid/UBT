@@ -3,7 +3,7 @@ cmd /c "start /min adb.bat"
 mode con lines=70 cols=89
 title Ultimate Backup Tool v1.1
 if exist adb.exe (
-echo Okay
+echo ADB found! Continuing...
 ) else (
 echo ADB not found in path!
 pause
@@ -11,6 +11,9 @@ exit
 )
 goto menu
 :menu
+if not defined Pfad (
+set Pfad=C:\backup\
+)
 cls
 echo				       Ultimate Backup tool v1.1
 echo				        by Gigadroid
