@@ -536,7 +536,7 @@ goto menu
 cls
 echo Look at your phone.
 echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
-adb backup -apk -noshared - nosystem -f %Pfad%
+adb backup -apk -noshared -nosystem -f %Pfad%
 pause
 goto menu
 
