@@ -1,7 +1,7 @@
 @echo off
 cmd /c "start /min adb.bat"
 mode con lines=70 cols=89
-title Ultimate Backup Tool
+title Ultimate Backup Tool v1.1
 if exist adb.exe (
 echo Okay
 ) else (
@@ -12,7 +12,7 @@ exit
 goto menu
 :menu
 cls
-echo				       Ultimate Backup tool
+echo				       Ultimate Backup tool v1.1
 echo				        by Gigadroid
 echo				     xda-developers.com
 echo.
