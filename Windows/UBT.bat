@@ -1,21 +1,22 @@
 @echo off
+set /p "Pfad="<"path.save"
 cmd /c "start /min adb.bat"
 mode con lines=70 cols=89
 title Ultimate Backup Tool v1.1
 if exist adb.exe (
-echo ADB found! Continuing...
+echo ADB found! Contuniuing...
 ) else (
 echo ADB not found in path!
-pause
 exit
+)
+ping 127.0.0.1 >nul
+if not defined Pfad (
+set Pfad=C:\backup\backup.ab
 )
 goto menu
 :menu
-if not defined Pfad (
-set Pfad=C:\backup\
-)
 cls
-echo				       Ultimate Backup tool v1.1
+echo				 Ultimate Backup tool v1.1
 echo				        by Gigadroid
 echo				     xda-developers.com
 echo.
@@ -37,47 +38,59 @@ echo What would you like to do?
 echo.
 echo ##########################################Backup#########################################
 echo. 
-echo  1. Set path (do that first)
+echo  1. Set path 
 echo  2. Backup all without system apps	
 echo  3. Backup all with system apps (unsafe)					     
 echo  4. Backup app and device data (not the APKs themselves)			     
 echo  5. Backup apps								     
 echo  6. Backup device shared storage / SD card contents
-echo  7. Restore
+echo  7. Backup a single app
+echo  8. Restore
 echo. 										     
 echo #########################################################################################
 echo.
 echo ##########################################Tools##########################################
 echo. 										     
-echo  8.  Install Drivers							     
-echo  9.  Unlock Bootloader (only Galaxy Nexus, will wipe all data)		     
-echo  10. Install CWM/ CWM Touch(only Galaxy Nexus, more devices coming soon)	     
-echo  11. Root your phone (requires custom recovery)				     
-echo  12. All in one (only Galaxy Nexus, will wipe all data)			     
+echo  9.  Install Drivers							     
+echo  10. Unlock Bootloader (only Galaxy Nexus, will wipe all data)		     
+echo  11. Install CWM/ CWM Touch(only Galaxy Nexus, S2 and S3)	     
+echo  12. Root your phone (requires custom recovery)				     
+echo  13. All in one (only Galaxy Nexus, will wipe all data)			     
 echo. 										     
 echo #########################################################################################
 echo. 
-echo  13. Quit
+echo  14. Quit
 echo.
 set /P C=Choose a option:
-if "%C%"=="8" goto drivers
-if "%C%"=="12" goto one
-if "%C%"=="11" goto root1
-if "%C%"=="10" goto cwm
-if "%C%"=="9" goto unlock
-if "%C%"=="13" goto quit
-if "%C%"=="7" goto restore
+if "%C%"=="9" goto drivers
+if "%C%"=="13" goto one
+if "%C%"=="12" goto root1
+if "%C%"=="11" goto cwm
+if "%C%"=="10" goto unlock
+if "%C%"=="14" goto quit
+if "%C%"=="8" goto restore
 if "%C%"=="6" goto sd
 if "%C%"=="5" goto apps
 if "%C%"=="4" goto appsdevice
 if "%C%"=="3" goto system
 if "%C%"=="2" goto all
 if "%C%"=="1" goto path 
+if "%C%"=="7" goto single
+
+:single 
+cls
+set /P App=List the package name (e.g. com.google.android.apps.plus) that you would like to backup:
+adb backup ^<%App%^> f- %Pfad%
+echo Look at your phone.
+echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
+pause
+goto menu
 
 :path
 cls
 echo.
 set /P Pfad=Type the path where the backup should be stored (like C:\backup\backup.ab):
+echo %Pfad%>path.save
 goto menu
 
 :one
@@ -352,14 +365,231 @@ cls
 echo.
 echo Which device schould get CWM?
 echo.
-echo 1. Galaxy Nexus (GSM)
-echo 2. Galaxy Nexus (Sprint)
-echo 3. Galaxy Nexus (Verizon) 
+echo 1. Samsung Galaxy Nexus 
+echo 2. Samsung Galaxy S2
+echo 3. Samsung Galaxy S3
 echo.
+set /P C=Choose a option:
+if "%C%"=="1" goto nexus
+if "%C%"=="2" goto s2
+if "%C%"=="3" goto s3
+
+:s3
+cls
+echo 1. GT-I9300
+echo 2. AT&T
+echo 3. Sprint
+echo 4. T-Mobile
+echo 5. US Cellular
+echo 6. Verizon
+echo.
+set /P C=Choose a option:
+if "%C%"=="1" goto s3orig
+if "%C%"=="2" goto s3att
+if "%C%"=="3" goto s3sprint
+if "%C%"=="4" goto s3tm
+if "%C%"=="5" goto s3us
+if "%C%"=="6" goto s3verizon
+
+:s3orig
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-6.0.1.2-i9300.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-6.0.1.2-i9300.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:s3att
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-6.0.1.2-d2att.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-6.0.1.2-d2att.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:s3sprint
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-6.0.1.2-d2spr.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-6.0.1.2-d2spr.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:s3tm
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-6.0.1.2-d2tmo.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-6.0.1.2-d2tmo.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:s3us
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-6.0.1.2-d2usc.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-6.0.1.2-d2usc.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:s3verizon
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-6.0.1.2-d2vzw.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-6.0.1.2-d2vzw.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:s2
+cls
+echo 1. AT&T
+echo 2. GT-I9100
+echo 3. SGH-I777
+echo 4. galaxys2 (dont ask me what this means, I have it from clockworkmod.com. If you now what it means send me a PM)
+echo 5. T-Mobile
+echo.
+set /P C=Choose a option:
+if "%C%"=="1" goto s2att
+if "%C%"=="2" goto s2orig
+if "%C%"=="3" goto s2sgh
+if "%C%"=="4" goto s2s2
+if "%C%"=="5" goto s2tm
+
+:s2att
+cls
+echo Your phone may not be in fastboot mode.
+pause
+echo Your phone will now be rooted.
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-5.0.2.6-galaxys2att.zip
+cls
+echo Flashing ...
+adb push recovery-clockwork-5.0.2.6-galaxys2att.zip /sdcard/recovery-clockwork-5.0.2.6-galaxys2att.zip
+adb shell "echo 'boot-recovery ' > /cache/recovery/command"
+adb shell "echo '--update_package=/sdcard/recovery-clockwork-5.0.2.6-galaxys2att.zip' >> /cache/recovery/command"
+adb shell "reboot recovery"
+echo You have installed CWM.
+pause
+goto menu
+
+:s2orig
+cls
+echo Your phone may not be in fastboot mode.
+pause
+echo Your phone will now be rooted.
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-6.0.1.0-i9100.zip
+cls
+echo Flashing ...
+adb push recovery-clockwork-6.0.1.0-i9100.zip /sdcard/recovery-clockwork-6.0.1.0-i9100.zip
+adb shell "echo 'boot-recovery ' > /cache/recovery/command"
+adb shell "echo '--update_package=/sdcard/recovery-clockwork-6.0.1.0-i9100.zip' >> /cache/recovery/command"
+adb shell "reboot recovery"
+echo You have installed CWM.
+pause
+goto menu
+
+:s2sgh
+cls
+echo Your phone may not be in fastboot mode.
+pause
+echo Your phone will now be rooted.
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-6.0.1.0-i777.zip
+cls
+echo Flashing ...
+adb push recovery-clockwork-6.0.1.0-i777.zip /sdcard/recovery-clockwork-6.0.1.0-i777.zip
+adb shell "echo 'boot-recovery ' > /cache/recovery/command"
+adb shell "echo '--update_package=/sdcard/recovery-clockwork-6.0.1.0-i777.zip' >> /cache/recovery/command"
+adb shell "reboot recovery"
+echo You have installed CWM.
+pause
+goto menu
+
+:s2s2
+cls
+echo Your phone may not be in fastboot mode.
+pause
+echo Your phone will now be rooted.
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-4.0.1.5-galaxys2.zip
+cls
+echo Flashing ...
+adb push recovery-clockwork-4.0.1.5-galaxys2.zip /sdcard/recovery-clockwork-4.0.1.5-galaxys2.zip
+adb shell "echo 'boot-recovery ' > /cache/recovery/command"
+adb shell "echo '--update_package=/sdcard/recovery-clockwork-4.0.1.5-galaxys2.zip' >> /cache/recovery/command"
+adb shell "reboot recovery"
+echo You have installed CWM.
+pause
+goto menu
+
+:s2tm
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-5.0.2.7-hercules.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-5.0.2.7-hercules.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:nexus
+cls
+echo 1. GSM
+echo 2. Sprint
+echo 3. Verizon
+echo
 set /P C=Choose a option:
 if "%C%"=="1" goto cwmgsm
 if "%C%"=="2" goto cwmsprint
-if "%C%"=="2" goto cwmverizon
+if "%C%"=="3" goto cwmverizon
+
 
 :cwmgsm
 cls
@@ -411,14 +641,177 @@ cls
 echo.
 echo Which device schould get CWM?
 echo.
-echo 1. Galaxy Nexus (GSM)
-echo 2. Galaxy Nexus (Sprint)
-echo 3. Galaxy Nexus (Verizon) 
+echo 1. Samsung Galaxy Nexus 
+echo 2. Samsung Galaxy S2
+echo 3. Samsung Galaxy S3
 echo.
+set /P C=Choose a option:
+if "%C%"=="1" goto nexustouch
+if "%C%"=="2" goto s2touch
+if "%C%"=="3" goto s3touch
+
+:s3touch
+cls
+echo 1. GT-I9300
+echo 2. Sprint
+echo 3. T-Mobile
+echo 4. Verizon
+echo.
+set /P C=Choose a option:
+if "%C%"=="1" goto s3origtouch
+if "%C%"=="2" goto s3sprinttouch
+if "%C%"=="3" goto s3tmtouch
+if "%C%"=="4" goto s3verizontouch
+
+:s3origtouch
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-touch-6.0.1.2-i9300.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-touch-6.0.1.2-i9300.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:s3sprinttouch
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-touch-6.0.1.2-d2spr.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-touch-6.0.1.2-d2spr.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:s3tmtouch
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-touch-6.0.1.2-d2tmo.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-touch-6.0.1.2-d2tmo.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:s3verizontouch
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-touch-6.0.1.2-d2vzw.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-touch-6.0.1.2-d2vzw.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:s2touch
+cls
+echo 1. AT&T
+echo 2. SGH-I777
+echo 3. galaxys2 
+echo 4. T-Mobile
+echo.
+set /P C=Choose a option:
+if "%C%"=="1" goto s2atttouch
+if "%C%"=="2" goto s2sghtouch
+if "%C%"=="3" goto s2s2touch
+if "%C%"=="4" goto s2tmtouch
+
+:s2atttouch
+cls
+echo Your phone may not be in fastboot mode.
+pause
+echo Your phone will now be rooted.
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-touch-5.8.1.5-galaxys2att.zip
+cls
+echo Flashing ...
+adb push recovery-clockwork-touch-5.8.1.5-galaxys2att.zip /sdcard/recovery-clockwork-touch-5.8.1.5-galaxys2att.zip
+adb shell "echo 'boot-recovery ' > /cache/recovery/command"
+adb shell "echo '--update_package=/sdcard/recovery-clockwork-touch-5.8.1.5-galaxys2att.zip' >> /cache/recovery/command"
+adb shell "reboot recovery"
+echo You have installed CWM.
+pause
+goto menu
+
+:s2sghtouch
+cls
+echo Your phone may not be in fastboot mode.
+pause
+echo Your phone will now be rooted.
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-touch-6.0.1.0-i777.zip
+cls
+echo Flashing ...
+adb push recovery-clockwork-touch-6.0.1.0-i777.zip /sdcard/recovery-clockwork-touch-6.0.1.0-i777.zip
+adb shell "echo 'boot-recovery ' > /cache/recovery/command"
+adb shell "echo '--update_package=/sdcard/recovery-clockwork-touch-6.0.1.0-i777.zip' >> /cache/recovery/command"
+adb shell "reboot recovery"
+echo You have installed CWM.
+pause
+goto menu
+
+:s2s2touch
+cls
+echo Your phone may not be in fastboot mode.
+pause
+echo Your phone will now be rooted.
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-touch-5.8.1.5-galaxys2.zip
+cls
+echo Flashing ...
+adb push recovery-clockwork-touch-5.8.1.5-galaxys2.zip /sdcard/recovery-clockwork-touch-5.8.1.5-galaxys2.zip
+adb shell "echo 'boot-recovery ' > /cache/recovery/command"
+adb shell "echo '--update_package=/sdcard/recovery-clockwork-touch-5.8.1.5-galaxys2.zip' >> /cache/recovery/command"
+adb shell "reboot recovery"
+echo You have installed CWM.
+pause
+goto menu
+
+:s2tmtouch
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-touch-6.0.1.2-hercules.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-touch-6.0.1.2-hercules.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
+:nexustouch
+cls
+echo 1. GSM
+echo 2. Sprint
+echo 3. Verizon
+echo
 set /P C=Choose a option:
 if "%C%"=="1" goto cwmtouchgsm
 if "%C%"=="2" goto cwmtouchsprint
-if "%C%"=="2" goto cwmtouchverizon
+if "%C%"=="3" goto cwmtouchverizon
 
 :cwmtouchgsm
 cls
@@ -484,6 +877,7 @@ goto menu
 :root1
 cls
 echo Your phone may not be in fastboot mode.
+pause
 echo Your phone will now be rooted.
 echo Downloading...
 wget -q -N http://downloads.noshufou.netdna-cdn.com/superuser/Superuser-3.1.3-arm-signed.zip
@@ -551,7 +945,7 @@ goto menu
 :restore
 cls
 echo Look at your phone and type your password.
-adb restore %Pfad%
+adb restore "%Pfad%"
 pause
 goto menu
 
