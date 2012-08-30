@@ -1,9 +1,9 @@
 @echo off
 cmd /c "start /min adb.bat"
 mode con lines=70 cols=89
-title Ultimate Backup Tool
+title Ultimate Backup Tool v1.1
 if exist adb.exe (
-echo Okay
+echo ADB found! Continuing...
 ) else (
 echo ADB not found in path!
 pause
@@ -11,8 +11,11 @@ exit
 )
 goto menu
 :menu
+if not defined Pfad (
+set Pfad=C:\backup\
+)
 cls
-echo				       Ultimate Backup tool
+echo				       Ultimate Backup tool v1.1
 echo				        by Gigadroid
 echo				     xda-developers.com
 echo.
@@ -533,7 +536,7 @@ goto menu
 cls
 echo Look at your phone.
 echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
-adb backup -apk -noshared - nosystem -f %Pfad%
+adb backup -apk -noshared -nosystem -f %Pfad%
 pause
 goto menu
 
