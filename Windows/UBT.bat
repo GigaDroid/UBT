@@ -1,22 +1,26 @@
 @echo off
 set /p "Pfad="<"path.save"
 cmd /c "start /min adb.bat"
-mode con lines=70 cols=89
-title Ultimate Backup Tool v1.1
+mode con lines=70 cols=82
+title Ultimate Backup Tool v1.2.2
 if exist adb.exe (
-echo ADB found! Contuniuing...
+echo ADB found! Continuing
 ) else (
 echo ADB not found in path!
+pause
 exit
 )
 ping 127.0.0.1 >nul
 if not defined Pfad (
 set Pfad=C:\backup\backup.ab
 )
+SET chkDevice=false
+SET chkFastbot=false
 goto menu
+
 :menu
 cls
-echo				 Ultimate Backup tool v1.1
+echo				 Ultimate Backup tool v1.2.3
 echo				        by Gigadroid
 echo				     xda-developers.com
 echo.
@@ -29,35 +33,39 @@ echo If you want to make a backup,set a desktop backup password under Developer
 echo Options. It seems it would fail otherwise!
 echo Make sure that you have correctly installed drivers!
 echo The backup will be saved in %Pfad% .
-echo If a code is below ADB is working properly:
-adb devices
-echo If a code is below fastboot is working properly:
-fastboot devices
+if NOT "%chkDevice%"=="true" goto devices
+adb devices | FINDSTR /IL "0" >nul
+IF %ERRORLEVEL% EQU 0 adb devices
+IF %ERRORLEVEL% EQU 1 echo List of devices attached : NO DEVICE
+if NOT "%chkFastboot%"=="true" goto fastbot
+fastboot devices | FINDSTR /IL "0" >nul
+IF %ERRORLEVEL% EQU 0 fastboot devices
+IF %ERRORLEVEL% EQU 1 echo List of fastboot devices : NO DEVICE
 echo.
 echo What would you like to do?
 echo.
-echo ##########################################Backup#########################################
-echo. 
-echo  1. Set path 
-echo  2. Backup all without system apps	
-echo  3. Backup all with system apps (unsafe)					     
-echo  4. Backup app and device data (not the APKs themselves)			     
-echo  5. Backup apps								     
-echo  6. Backup device shared storage / SD card contents
-echo  7. Backup a single app
-echo  8. Restore
-echo. 										     
-echo #########################################################################################
+echo  ##############################     Backup     ##################################
+echo  #                                                                              #
+echo  #   1. Set path                                                                #
+echo  #   2. Backup all without system apps                                          #
+echo  #   3. Backup all with system apps (unsafe)                                    #
+echo  #   4. Backup app and device data (not the APKs themselves)                    #
+echo  #   5. Backup apps                                                             #
+echo  #   6. Backup device shared storage / SD card contents                         #
+echo  #   7. Backup a single app                                                     #
+echo  #   8. Restore                                                                 #
+echo  #                                                                              #
+echo  ################################################################################
 echo.
-echo ##########################################Tools##########################################
-echo. 										     
-echo  9.  Install Drivers							     
-echo  10.  Unlock Bootloader (only Galaxy Nexus, will wipe all data)		     
-echo  11. Install CWM/ CWM Touch(only Galaxy Nexus, more devices coming soon)	     
-echo  12. Root your phone (requires custom recovery)				     
-echo  13. All in one (only Galaxy Nexus, will wipe all data)			     
-echo. 										     
-echo #########################################################################################
+echo  ###############################    Tools     ###################################
+echo  #                                                                              #
+echo  #   9.  Install Drivers                                                        #
+echo  #   10. Unlock Bootloader (only Galaxy Nexus, will wipe all data)              #
+echo  #   11. Install CWM/ CWM Touch (only Galaxy Nexus, more devices coming soon)   #
+echo  #   12. Root your phone (requires custom recovery)                             #
+echo  #   13. All in one (only Galaxy Nexus, will wipe all data)                     #
+echo  #                                                                              #
+echo  ################################################################################
 echo. 
 echo  14. Quit
 echo.
@@ -76,6 +84,16 @@ if "%C%"=="3" goto system
 if "%C%"=="2" goto all
 if "%C%"=="1" goto path 
 if "%C%"=="7" goto single
+
+:devices
+echo Checking list of attached devices...
+set chkDevice=true
+goto menu
+
+:fastbot
+echo Checking fastboot...
+set chkFastboot=true
+goto menu
 
 :single 
 cls
@@ -272,21 +290,22 @@ cls
 echo.
 echo If your drivers don't work try on from these (uninstall your previous drivers first):
 echo 1. Samsung Driver
-echo 2. PDAnet's Driver (32-bit) (only GNex)
-echo 3. PDAnet's Driver (64-bit) (only GNex)
-echo 4. HTC Sync (installs the drivers, you don't need to install HTC Sync to make it work)
-echo 5. Sony Drivers (will open a website)
-echo 6. Motorola Device Manager 
-echo 7. LG Drivers (will open a website)
+echo 2. HTC Sync (installs the drivers, you don't need to install HTC Sync to make it work)
+echo 3. Sony Drivers (will open a website)
+echo 4. Motorola Device Manager 
+echo 5. LG Drivers (will open a website)
+echo 6. PDAnet's Driver (only GNex)
+
+
+
 echo.
 set /P C=Choose a option:
 if "%C%"=="1" goto driver1
-if "%C%"=="2" goto driver3
-if "%C%"=="3" goto driver4
-if "%C%"=="4" goto driver5
-if "%C%"=="5" goto driver2
-if "%C%"=="7" goto driver7
-if "%C%"=="6" goto driver6
+if "%C%"=="6" goto driver4
+if "%C%"=="2" goto driver5
+if "%C%"=="3" goto driver2
+if "%C%"=="5" goto driver7
+if "%C%"=="4" goto driver6
 
 :driver7
 start http://www.lgforum.com/resources
@@ -326,17 +345,8 @@ start SAMSUNG_USB_Driver_for_Mobile_Phones_1_5_6_0.exe
 pause
 goto menu
 
-:driver3
-cls
-echo Downloading...
-wget -q -N http://pdanet.co/bin/PdaNetA350.exe
-cls
-echo The driver will now be installed
-start PdaNetA350.exe
-pause
-goto menu
-
 :driver4
+if exist %PROGRAMFILES(X86)% (
 cls
 echo Downloading...
 wget -q -N http://pdanet.co/bin/PdaNetA350x64.exe
@@ -345,6 +355,16 @@ echo The driver will now be installed
 start PdaNetA350x64.exe
 pause
 goto menu
+) else (
+cls
+echo Downloading...
+wget -q -N http://pdanet.co/bin/PdaNetA350.exe
+cls
+echo The driver will now be installed
+start PdaNetA350.exe
+pause
+goto menu
+)
 
 :cwm
 cls
