@@ -2,7 +2,7 @@
 set /p "Pfad="<"path.save"
 cmd /c "start /min adb.bat"
 mode con lines=70 cols=82
-title Ultimate Backup Tool v1.3
+title Ultimate Backup Tool v1.3.1.1
 if exist adb.exe (
 echo ADB found! Continuing
 ) else (
@@ -62,7 +62,7 @@ echo 1 > language.save
 del msg.vbs
 del search.find
 cls
-echo				 Ultimate Backup tool v1.3
+echo				 Ultimate Backup tool v1.3.1
 echo				        by Gigadroid
 echo				     xda-developers.com
 echo.
@@ -246,9 +246,33 @@ goto menu
 cls
 set /P App=List the package name (e.g. com.google.android.apps.plus) that you would like to backup:
 echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
-adb backup ^<%App%^> f- "%Pfad%"
-pause
+adb backup ^<%App%^> -f "%Pfad%" > search.find 2>&1
+findstr "adb" search.find >nul
+IF %ERRORLEVEL% EQU 1 goto singlecomplete
+IF %ERRORLEVEL% EQU 0 goto singlefailed
+
+:singlecomplete
+@echo off &setlocal
+>"msg.vbs" (
+echo WScript.Quit _
+echo MsgBox("Backup complete!", _
+echo 1 Or 256 Or 1, _
+echo "Ultimate Backup Tool"^)
+)
+wscript "msg.vbs"
 goto menu
+
+:singlefailed
+@echo off &setlocal
+>"msg.vbs" (
+echo WScript.Quit _
+echo MsgBox("Backup failed!", _
+echo 5 Or 256 Or 16, _
+echo "Ultimate Backup Tool"^)
+)
+wscript "msg.vbs"
+IF %ERRORLEVEL% EQU 2 goto menu
+IF %ERRORLEVEL% EQU 4 goto single
 
 :path
 cls
@@ -1529,7 +1553,7 @@ echo "Ultimate Backup Tool"^)
 )
 wscript "msg.vbs"
 IF %ERRORLEVEL% EQU 2 goto menu
-IF %ERRORLEVEL% EQU 4 goto system
+IF %ERRORLEVEL% EQU 4 goto all
 
 :system
 cls
@@ -1591,7 +1615,7 @@ echo "Ultimate Backup Tool"^)
 )
 wscript "msg.vbs"
 IF %ERRORLEVEL% EQU 2 goto menu
-IF %ERRORLEVEL% EQU 4 goto system
+IF %ERRORLEVEL% EQU 4 goto appsdevice
 
 :apps
 cls
@@ -1622,7 +1646,7 @@ echo "Ultimate Backup Tool"^)
 )
 wscript "msg.vbs"
 IF %ERRORLEVEL% EQU 2 goto menu
-IF %ERRORLEVEL% EQU 4 goto system
+IF %ERRORLEVEL% EQU 4 goto apps
 
 :sd
 cls
@@ -1653,11 +1677,11 @@ echo "Ultimate Backup Tool"^)
 )
 wscript "msg.vbs"
 IF %ERRORLEVEL% EQU 2 goto menu
-IF %ERRORLEVEL% EQU 4 goto system
+IF %ERRORLEVEL% EQU 4 goto sd
 
 :restore
 cls
-adb restore "%Pfad%"
+adb restore "%Pfad%" > search.find 2>&1
 findstr "adb" search.find >nul
 IF %ERRORLEVEL% EQU 1 goto restorecomplete
 IF %ERRORLEVEL% EQU 0 goto restorefailed
@@ -1666,7 +1690,7 @@ IF %ERRORLEVEL% EQU 0 goto restorefailed
 @echo off &setlocal
 >"msg.vbs" (
 echo WScript.Quit _
-echo MsgBox("Backup complete!", _
+echo MsgBox("Restore complete!", _
 echo 1 Or 256 Or 1, _
 echo "Ultimate Backup Tool"^)
 )
@@ -1677,13 +1701,13 @@ goto menu
 @echo off &setlocal
 >"msg.vbs" (
 echo WScript.Quit _
-echo MsgBox("Backup failed!", _
+echo MsgBox("Restore failed!", _
 echo 5 Or 256 Or 16, _
 echo "Ultimate Backup Tool"^)
 )
 wscript "msg.vbs"
 IF %ERRORLEVEL% EQU 2 goto menu
-IF %ERRORLEVEL% EQU 4 goto system
+IF %ERRORLEVEL% EQU 4 goto restore
 
 :quit
 taskkill /f /im adb.exe
@@ -1734,7 +1758,7 @@ echo 2 > language.save
 del msg.vbs
 del search.find
 cls
-echo				 Ultimate Backup tool v1.3
+echo				 Ultimate Backup tool v1.3.1
 echo				        von Gigadroid
 echo                              übersetzt von TheMaurice
 echo				     xda-developers.com
@@ -1904,9 +1928,33 @@ goto menuger
 cls
 set /P App=Gib den Paketnamen (z.B. com.google.android.apps.plus) an, das du sichern moechtest:
 echo Warte, bis du die Nachricht "Backup erfolgreich" siehst oder das Geraet zum Homescreen zurueckkehrt.
-adb backup ^<%App%^> f- "%Pfad%"
-pause
+adb backup ^<%App%^> -f "%Pfad%" > search.find 2>&1
+findstr "adb" search.find >nul
+IF %ERRORLEVEL% EQU 1 goto singlecompleteger
+IF %ERRORLEVEL% EQU 0 goto singlefailedger
+
+:singlecompleteger
+@echo off &setlocal
+>"msg.vbs" (
+echo WScript.Quit _
+echo MsgBox("Backup erfolgreich!", _
+echo 1 oder 256 oder 1, _
+echo "Ultimate Backup Tool"^)
+)
+wscript "msg.vbs"
 goto menuger
+
+:singlefailedger
+@echo off &setlocal
+>"msg.vbs" (
+echo WScript.Quit _
+echo MsgBox("Backup fehlgeschlagen!", _
+echo 5 oder 256 oder 16, _
+echo "Ultimate Backup Tool"^)
+)
+wscript "msg.vbs"
+IF %ERRORLEVEL% EQU 2 goto menuger
+IF %ERRORLEVEL% EQU 4 goto singleger
 
 :pathger
 cls
@@ -3187,7 +3235,7 @@ echo "Ultimate Backup Tool"^)
 )
 wscript "msg.vbs"
 IF %ERRORLEVEL% EQU 2 goto menuger
-IF %ERRORLEVEL% EQU 4 goto systemger
+IF %ERRORLEVEL% EQU 4 goto allger
 
 :systemger
 cls
@@ -3249,7 +3297,7 @@ echo "Ultimate Backup Tool"^)
 )
 wscript "msg.vbs"
 IF %ERRORLEVEL% EQU 2 goto menuger
-IF %ERRORLEVEL% EQU 4 goto systemger
+IF %ERRORLEVEL% EQU 4 goto appsdeviceger
 
 :appsger
 cls
@@ -3280,7 +3328,7 @@ echo "Ultimate Backup Tool"^)
 )
 wscript "msg.vbs"
 IF %ERRORLEVEL% EQU 2 goto menuger
-IF %ERRORLEVEL% EQU 4 goto systemger
+IF %ERRORLEVEL% EQU 4 goto appsger
 
 :sdger
 cls
@@ -3311,11 +3359,11 @@ echo "Ultimate Backup Tool"^)
 )
 wscript "msg.vbs"
 IF %ERRORLEVEL% EQU 2 goto menuger
-IF %ERRORLEVEL% EQU 4 goto systemger
+IF %ERRORLEVEL% EQU 4 goto sdger
 
 :restoreger
 cls
-adb restore "%Pfad%"
+adb restore "%Pfad%" > search.find 2>&1
 findstr "adb" search.find >nul
 IF %ERRORLEVEL% EQU 1 goto restorecompleteger
 IF %ERRORLEVEL% EQU 0 goto restorefailedger
@@ -3324,7 +3372,7 @@ IF %ERRORLEVEL% EQU 0 goto restorefailedger
 @echo off &setlocal
 >"msg.vbs" (
 echo WScript.Quit _
-echo MsgBox("Backup erfolgreich!", _
+echo MsgBox("Wiederherstellung erfolgreich!", _
 echo 1 oder 256 oder 1, _
 echo "Ultimate Backup Tool"^)
 )
@@ -3335,13 +3383,13 @@ goto menuger
 @echo off &setlocal
 >"msg.vbs" (
 echo WScript.Quit _
-echo MsgBox("Backup fehlgeschlagen!", _
+echo MsgBox("Wiederherstellung fehlgeschlagen!", _
 echo 5 oder 256 oder 16, _
 echo "Ultimate Backup Tool"^)
 )
 wscript "msg.vbs"
 IF %ERRORLEVEL% EQU 2 goto menuger
-IF %ERRORLEVEL% EQU 4 goto systemger
+IF %ERRORLEVEL% EQU 4 goto restoreger
 
 :quitger
 taskkill /f /im adb.exe
