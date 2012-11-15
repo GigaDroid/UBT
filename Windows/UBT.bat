@@ -2,7 +2,7 @@
 set /p "Pfad="<"path.save"
 cmd /c "start /min adb.bat"
 mode con lines=70 cols=82
-title Ultimate Backup Tool v1.3.1.1
+title Ultimate Backup Tool v1.3.2
 if exist adb.exe (
 echo ADB found! Continuing
 ) else (
@@ -62,7 +62,7 @@ echo 1 > language.save
 del msg.vbs
 del search.find
 cls
-echo				 Ultimate Backup tool v1.3.1
+echo				 Ultimate Backup tool v1.3.2
 echo				        by Gigadroid
 echo				     xda-developers.com
 echo.
@@ -132,16 +132,17 @@ echo.
 echo ###############################    Tools     ###################################
 echo #                                                                              #
 echo #   9.  Install Drivers                                                        #
-echo #   10. Unlock Bootloader (only Galaxy Nexus, will wipe all data)              #
-echo #   11. Install CWM/ CWM Touch (only Galaxy Nexus, more devices coming soon)   #
+echo #   10. Unlock Bootloader (Uses "fastboot oem unlock" command)                 #
+echo #   11. Install CWM/ CWM Touch (Galaxy Nexus, S2 and S3)                       #
 echo #   12. Root your phone (ARM) (requires custom recovery)                       #
-echo #   13. All in one (only Galaxy Nexus, will wipe all data)                     #
+echo #   13. All in one (Galaxy Nexus, S2 and S3)                                   #
 echo #                                                                              #
 echo ################################################################################
 echo. 
 echo     14. Refresh
-echo     15. Change language
-echo     16. Quit
+echo     15. Capture a problem
+echo     16. Change language
+echo     17. Quit
 del version.check
 del manufacturer.check
 del model.check
@@ -155,7 +156,7 @@ if "%C%"=="13" goto one
 if "%C%"=="12" goto root1
 if "%C%"=="11" goto cwm
 if "%C%"=="10" goto unlock
-if "%C%"=="16" goto quit
+if "%C%"=="17" goto quit
 if "%C%"=="8" goto restore
 if "%C%"=="6" goto sd
 if "%C%"=="5" goto apps
@@ -165,10 +166,17 @@ if "%C%"=="2" goto all
 if "%C%"=="1" goto path 
 if "%C%"=="7" goto single
 if "%C%"=="14" goto refresh
-if "%C%"=="15" goto language
+if "%C%"=="16" goto language
+if "%C%"=="15" goto problem 
 echo.
 echo Incorrect input, try again.
 goto choose
+
+:problem
+start captureproblem.bat
+echo After you have recorded your problem, post your log under the XDA-Thread of Ultimate Backup Tool.
+pause
+goto menu
 
 :language
 cls
@@ -244,7 +252,8 @@ goto menu
 
 :single 
 cls
-set /P App=List the package name (e.g. com.google.android.apps.plus) that you would like to backup:
+start singleappbackup.bat
+set /P App=Look at the window that was opened. Find the package name of the app you want to backup and type it here:
 echo Wait until you see a message saying 'Backup complete' or your phone returns to the home screen.
 adb backup ^<%App%^> -f "%Pfad%" > search.find 2>&1
 findstr "adb" search.find >nul
@@ -307,7 +316,7 @@ echo Which ClockworkMod Recovery do you wish to install?
 echo.
 echo 1. Standard ClockworkMod Recovery
 echo 2. ClockworkMod Touch Recovery 
-echo 3. 
+echo 3. Back
 echo.
 set /P C=Choose a option:
 if "%C%"=="1" goto ones3normal
@@ -967,19 +976,67 @@ echo.
 echo 1. Samsung Galaxy Nexus 
 echo 2. Samsung Galaxy S2
 echo 3. Samsung Galaxy S3
-echo 4. Back
+echo 4. Samsung Galaxy Note
+echo 5. Back
 echo.
 set /P C=Choose a option:
 if "%C%"=="1" goto nexus
 if "%C%"=="2" goto s2
 if "%C%"=="3" goto s3
-if "%C%"=="4" goto cwm
+if "%C%"=="4" goto note
+if "%C%"=="5" goto cwm
 echo.
 echo Incorrect input, try again.
 goto normal
 
+:note
+cls
+echo.
+echo 1. GT-N7000
+echo 2. AT and T
+echo.
+set /P C=Choose a option:
+if "%C%"=="1" goto n7000
+if "%C%"=="2" goto n7000att
+if "%C%"=="3" goto normal
+echo.
+echo Incorrect input, try again.
+goto note
+
+:n7000
+cls
+echo Your phone may not be in fastboot mode.
+pause
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-6.0.1.2-n7000.zip
+cls
+echo Flashing ...
+adb push recovery-clockwork-6.0.1.2-n7000.zip /sdcard/recovery-clockwork-6.0.1.2-n7000.zip
+adb shell "echo 'boot-recovery ' > /cache/recovery/command"
+adb shell "echo '--update_package=/sdcard/recovery-clockwork-6.0.1.2-n7000.zip' >> /cache/recovery/command"
+adb shell "reboot recovery"
+echo You have installed CWM.
+pause
+goto menu
+
+:n7000att
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-5.8.4.8-quincyatt.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery-clockwork-5.8.4.8-quincyatt.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
+
 :s3
 cls
+echo.
 echo 1. GT-I9300
 echo 2. AT and T
 echo 3. Sprint
@@ -1240,16 +1297,33 @@ echo.
 echo 1. Samsung Galaxy Nexus 
 echo 2. Samsung Galaxy S2
 echo 3. Samsung Galaxy S3
-echo 4. Back
+echo 4. Samsung Galaxy Note (only AT and T)
+echo 5. Back
 echo.
 set /P C=Choose a option:
 if "%C%"=="1" goto nexustouch
 if "%C%"=="2" goto s2touch
 if "%C%"=="3" goto s3touch
-if "%C%"=="4" goto cwm
+if "%C%"=="4" goto n7000atttouch
+if "%C%"=="5" goto cwm
 echo.
 echo Incorrect input, try again.
 goto touch
+
+:n7000atttouch
+cls
+adb shell mv /system/recovery-from-boot.p /system/recovery-from-boot.p-old
+adb shell mv /system/etc/install-recovery.sh /system/etc/install-recovery.sh-old
+echo Downloading...
+wget -q -N http://download2.clockworkmod.com/recoveries/recovery-clockwork-touch-5.8.4.3-quincyatt.img
+cls
+adb reboot bootloader
+echo Flashing...
+fastboot flash recovery recovery-clockwork-touch-5.8.4.3-quincyatt.img
+fastboot reboot
+echo You have installed CWM.
+pause
+goto menu
 
 :s3touch
 cls
@@ -1342,7 +1416,7 @@ if "%C%"=="1" goto s2atttouch
 if "%C%"=="2" goto s2sghtouch
 if "%C%"=="3" goto s2s2touch
 if "%C%"=="4" goto s2tmtouch
-if "%C%"=="5" goto touch
+if "%C%"=="3" goto touch
 echo.
 echo Incorrect input, try again.
 goto s2touch
@@ -1758,7 +1832,7 @@ echo 2 > language.save
 del msg.vbs
 del search.find
 cls
-echo				 Ultimate Backup tool v1.3.1
+echo				 Ultimate Backup tool v1.3.2
 echo				        von Gigadroid
 echo                              übersetzt von TheMaurice
 echo				     xda-developers.com
@@ -1837,8 +1911,9 @@ echo #                                                                          
 echo ################################################################################
 echo. 
 echo     14. Aktualisieren
-echo     15. Change language
-echo     16. Beenden
+echo     15. Problem aufzeichnen
+echo     16. Change language
+echo     17. Beenden
 del version.check
 del manufacturer.check
 del model.check
@@ -1852,7 +1927,7 @@ if "%C%"=="13" goto oneger
 if "%C%"=="12" goto root1ger
 if "%C%"=="11" goto cwmgerger
 if "%C%"=="10" goto unlockger
-if "%C%"=="16" goto quitger
+if "%C%"=="17" goto quitger
 if "%C%"=="8" goto restoreger
 if "%C%"=="6" goto sdger
 if "%C%"=="5" goto appsger
@@ -1862,10 +1937,17 @@ if "%C%"=="2" goto allger
 if "%C%"=="1" goto pathger
 if "%C%"=="7" goto singleger
 if "%C%"=="14" goto refreshger
-if "%C%"=="15" goto language
+if "%C%"=="16" goto language
+if "%C%"=="15" goto problemger
 echo.
 echo unrueltige Eingabe.
 goto chooseger
+
+:problemger
+start captureproblem.bat
+echo Nachdem du das Problem aufgezeichnet hast, poste deinen Log im XDA-Thread vom Ultimate Backup Tool.
+pause
+goto menu
 
 :sorry3ger
 @echo off &setlocal
@@ -1926,7 +2008,8 @@ goto menuger
 
 :singleger
 cls
-set /P App=Gib den Paketnamen (z.B. com.google.android.apps.plus) an, das du sichern moechtest:
+start singleappbackup.bat
+set /P App=Schaue auf das Fenster, welches sich geöffnet hat. Finde den Paketnamen der App, die du sichern möchtest und gebe ihn hier ein:
 echo Warte, bis du die Nachricht "Backup erfolgreich" siehst oder das Geraet zum Homescreen zurueckkehrt.
 adb backup ^<%App%^> -f "%Pfad%" > search.find 2>&1
 findstr "adb" search.find >nul

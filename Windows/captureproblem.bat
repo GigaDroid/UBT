@@ -1,0 +1,1 @@
+adb logcat -f log.txt
